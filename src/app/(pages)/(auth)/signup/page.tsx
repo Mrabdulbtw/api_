@@ -236,7 +236,7 @@ export default function Page() {
 
 
               <p className="text-sm font-light text-gray-500"> If you have an account?{" "}
-                <Link href="/" className="font-medium text-blue-600 hover:underline">
+                <Link href="./" className="font-medium text-blue-600 hover:underline">
                   Login here
                 </Link>
               </p>
