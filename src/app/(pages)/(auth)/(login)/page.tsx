@@ -140,7 +140,7 @@ export default function Page() {
                     required
                   />
                   <span onClick={() => setShowPass(!showPass)} className="absolute right-3">
-                    <Image className="cursor-pointer" src={!showPass ? "/eye-close.svg" : "/eye-open.svg"} alt="Eye Open" width={20} height={20} />
+                    <Image className="cursor-pointer" src={!showPass ? "./eye-close.svg" : "./eye-open.svg"} alt="Eye Open" width={20} height={20} />
                   </span>
                 </div>
                 <span className="text-red-700 text-sm">{error.password_err}</span>
