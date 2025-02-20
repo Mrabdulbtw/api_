@@ -3,7 +3,9 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import {Fields} from "../(login)/page"
+import { Fields } from "../(login)/page"
+import { useRouter } from "next/navigation";
+
 
 
 type Field = Fields & {
@@ -13,6 +15,8 @@ type Field = Fields & {
 
 
 export default function Page() {
+
+  const router = useRouter();
 
   const [fields, setFields] = useState<Field>({
     name: "",
@@ -29,8 +33,13 @@ export default function Page() {
   });
   const [showPass, setShowPass] = useState<boolean>(false);
 
+  const [msg, setMsg] = useState<string>("");
+
+
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMsg('');
     const { name, value } = e.target;
     setFields((prevFields) => ({
       ...prevFields,
@@ -38,63 +47,32 @@ export default function Page() {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const isValid: boolean = validation();
+
     if (isValid) {
-      console.log('login');
+      const res = await fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: fields.name,
+          email: fields.email,
+          password: fields.password
+        }),
+      }
+      )
+
+      const { status, msg } = await res.json();
+      if (status) {
+        setMsg(msg);
+        router.push('/');    
+      } else {
+        setMsg(msg);
+      }
     }
   };
-
-
-
-
-  // const validation = () => {
-
-  //   if (!fields.name.trim()) {
-  //     setError({ ...error, name_err: "Name is required" })
-
-  //   }
-
-  //   if (fields.name.trim().length < 3) {
-  //     setError({ ...error, name_err: "Name must be at least 3 characters long" })
-
-  //   }
-
-
-  //   if (!fields.email.trim()) {
-  //     setError({ ...error, email_err: "Email is required" })
-  //   }
-
-  //   const emailRegEx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  //   if (!emailRegEx.test(fields.email.trim())) {
-  //     setError({ ...error, email_err: "Email is not valid" })
-
-  //   }
-
-  //   if (!fields.password.trim()) {
-  //     setError({ ...error, password_err: "Password is required" })
-
-  //   }
-  //   if (!fields.confirmPassword.trim()) {
-  //     setError({ ...error, confirmPassword_err: "Confirm Password is required" })
-
-  //   }
-
-  //   if (fields.password.trim().length < 6) {
-  //     setError({ ...error, password_err: "Password must be at least 6 characters long" })
-
-  //   }
-
-  //   if (fields.confirmPassword.trim().length < 6) {
-  //     setError({ ...error, confirmPassword_err: "Confirm Password must be at least 6 characters long" })
-  //     return false
-  //   }
-
-  //   if (fields.password != fields.confirmPassword) {
-  //     setError({ ...error, password_err: "Password and Confirm Password must be same" })
-
-  //   }
-  // }
 
 
   const validation = (): boolean => {
@@ -153,12 +131,26 @@ export default function Page() {
 
 
 
+
+
+
+
+
   return (
     <div className="bg-gray-50">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
         <div className="w-full bg-white rounded-lg shadow border md:mt-0 sm:max-w-md xl:p-0">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 className="text-xl text-center font-bold text-gray-900 md:text-2xl">Register</h1>
+
+            {
+              msg.length > 0 && (
+                <div className="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50" role="alert">
+                  {msg}
+                </div>
+              )
+            }
+
 
             <div className="space-y-4 md:space-y-6" >
               <div>
@@ -248,13 +240,11 @@ export default function Page() {
                   Login here
                 </Link>
               </p>
-              
+
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-
-
 }

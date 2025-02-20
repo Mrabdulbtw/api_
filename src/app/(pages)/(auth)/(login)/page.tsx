@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 
 export type Fields = {
@@ -14,18 +15,20 @@ export type Fields = {
 
 export default function Page() {
 
+  const router = useRouter();
 
+  const [msg, setMsg] = useState<string>("");
   const [fields, setFields] = useState<Fields>({
     email: "",
     password: ""
   });
+
   const [error, setError] = useState({
     email_err: "",
     password_err: "",
   });
+
   const [showPass, setShowPass] = useState<boolean>(false);
-
-
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,13 +38,29 @@ export default function Page() {
     }));
   };
 
-
-  const handleSubmit = () => {
+  const handleSubmit = async() => {
     console.log(fields);
-    
+
     const isValid: boolean = validation();
     if (isValid) {
-      console.log('login');
+     
+      const res = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: fields.email,
+          password: fields.password
+        }),
+      });
+    
+      const { status, msg } = await res.json();
+      setMsg(msg);
+    
+      if (status) {
+        router.push('/notes');
+      }
     }
   };
 
@@ -71,9 +90,6 @@ export default function Page() {
     return isValid;
   };
 
-
-
-
   return (
     <div className="bg-gray-50">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
@@ -83,24 +99,29 @@ export default function Page() {
               Login
             </h1>
 
+            {
+              msg.length > 0 && (
+                <div className="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50" role="alert">
+                  {msg}
+                </div>
+              )
+            }
+
             <div className="space-y-4 md:space-y-6">
               <div>
-                <label
-                  htmlFor="email"
-                  className="block mb-2 text-sm font-medium text-gray-900"
-                >
+                <label  htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">
                   Email
                 </label>
                 <input
-                  value={fields.email}  
-                onChange={handleChange}  
+                  value={fields.email}
+                  onChange={handleChange}
                   type="email"
                   name="email"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
                   placeholder="name@gamil.com"
                   required
                 />
-                 <span className="text-red-700 text-sm">{error.email_err}</span>
+                <span className="text-red-700 text-sm">{error.email_err}</span>
               </div>
 
               <div>
@@ -126,11 +147,7 @@ export default function Page() {
               </div>
 
 
-              <button
-              onClick={handleSubmit}
-                type="submit"
-                className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-              >
+              <button onClick={handleSubmit} type="submit" className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
                 Login
               </button>
 
@@ -139,7 +156,6 @@ export default function Page() {
                 <Link href="/signup" className="font-medium text-blue-600 hover:underline">
                   Signup
                 </Link>
-
               </p>
             </div>
           </div>
